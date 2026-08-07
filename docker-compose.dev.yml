@@ -1,0 +1,24 @@
+# ─── Vigil — Development Overrides ────────────────────────────────────────────
+#
+# Extends docker-compose.yml with bind-mounts for hot reload.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+
+  api:
+    build:
+      target: dev
+    volumes:
+      - ./api/src:/app/src:ro
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+
+  dashboard:
+    build:
+      target: dev
+    volumes:
+      - ./dashboard/src:/app/src:ro
+    command: npm run dev
+    environment:
+      NODE_ENV: development

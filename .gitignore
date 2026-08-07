@@ -1,0 +1,27 @@
+# Go
+agent/vigil-agent
+agent/*.exe
+agent/vigil-agent.key
+
+# Node
+api/node_modules/
+api/dist/
+dashboard/node_modules/
+dashboard/.next/
+dashboard/out/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+*.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes (local data)
+data/
+
+# Logs
+*.log

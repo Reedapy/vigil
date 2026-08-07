@@ -1,0 +1,2 @@
+# Keeps the public/ directory in version control so the Docker build's
+# `COPY /app/public ./public` step succeeds on a fresh clone.

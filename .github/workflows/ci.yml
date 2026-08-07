@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  # ── Go Agent ──────────────────────────────────────────────────────────────────
+  agent:
+    name: Go Agent — Build & Vet
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: agent
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+          cache-dependency-path: agent/go.sum
+
+      - name: Download modules
+        run: go mod download
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Build
+        run: CGO_ENABLED=0 go build -o vigil-agent ./main.go
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: vigil-agent-linux-amd64
+          path: agent/vigil-agent
+          retention-days: 14
+
+  # ── API ───────────────────────────────────────────────────────────────────────
+  api:
+    name: API — Lint, Type-check & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm test
+
+  # ── Dashboard ─────────────────────────────────────────────────────────────────
+  dashboard:
+    name: Dashboard — Lint, Type-check & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:4000
+          NEXT_PUBLIC_WS_URL:  ws://localhost:4000
+
+  # ── Docker Compose smoke test ─────────────────────────────────────────────────
+  compose:
+    name: Docker Compose — Stack Smoke Test
+    runs-on: ubuntu-latest
+    needs: [agent, api, dashboard]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy env
+        run: cp .env.example .env
+
+      - name: Build images
+        run: docker compose build
+
+      - name: Start stack
+        run: docker compose up -d postgres api
+
+      - name: Wait for API health
+        run: |
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:4000/health; then exit 0; fi
+            sleep 3
+          done
+          echo "API did not become healthy" && exit 1
+
+      - name: Teardown
+        if: always()
+        run: docker compose down -v

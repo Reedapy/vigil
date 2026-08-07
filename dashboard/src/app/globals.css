@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+  --font-display: 'DM Sans', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: #080A0C;
+  color: #C8D0D8;
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection { background: #F59E0B33; color: #F59E0B; }
+
+/* Scrollbar styling */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #0F1215; }
+::-webkit-scrollbar-thumb { background: #1E2428; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #3A4048; }
+
+/* Grid scan-line overlay — gives the industrial CRT feel */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.04) 2px,
+    rgba(0,0,0,0.04) 4px
+  );
+}
+
+/* Recharts custom overrides */
+.recharts-tooltip-wrapper { outline: none !important; }
+
+/* Animated status dot */
+@keyframes ping-slow {
+  75%, 100% { transform: scale(1.8); opacity: 0; }
+}
+.status-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: ping-slow 2s cubic-bezier(0,0,0.2,1) infinite;
+}
