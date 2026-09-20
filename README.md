@@ -1,4 +1,4 @@
-# Vigil — Self-Hosted Infrastructure Monitoring
+# Vigil - Self-Hosted Infrastructure Monitoring
 
 > Deploy a Go agent to any server. Watch live CPU, memory, disk, and network metrics stream into a dark, industrial dashboard. Get alerted via Slack or email when thresholds are breached.
 
